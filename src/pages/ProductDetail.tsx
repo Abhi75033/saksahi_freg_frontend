@@ -1,19 +1,53 @@
 import { useParams, Link } from "react-router-dom";
 import { products, dummyReviews } from "@/data/products";
 import { useCart } from "@/context/CartContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Star, Minus, Plus, ShoppingBag, Zap, MapPin } from "lucide-react";
+import { Star, Minus, Plus, ShoppingBag, Zap, MapPin, Heart } from "lucide-react";
 import SectionWrapper from "@/components/SectionWrapper";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const product = products.find(p => p.id === id);
+  const product: any = products.find(p => p.id === id);
   const { addToCart } = useCart();
   const [qty, setQty] = useState(1);
   const [pincode, setPincode] = useState("");
+  const { user } = useAuth();
+  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  useEffect(() => {
+    if (product && user?.wishlist?.some((wid: any) => wid === product._id || wid === product.id)) {
+      setIsWishlisted(true);
+    }
+  }, [user, product]);
+
+  const toggleWishlist = async () => {
+    if (!user) {
+      toast.error("Please login to add to wishlist");
+      return;
+    }
+    try {
+      const res = await fetch("http://localhost:5001/api/users/wishlist", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({ productId: product._id || product.id }),
+      });
+      if (!res.ok) throw new Error("Failed to update wishlist");
+      setIsWishlisted(!isWishlisted);
+      toast.success(isWishlisted ? "Removed from wishlist" : "Added to wishlist");
+    } catch (error) {
+      toast.error("Error updating wishlist");
+    }
+  };
 
   if (!product) return <div className="container mx-auto px-4 py-20 text-center"><p>Product not found</p><Link to="/shop" className="text-primary">Back to Shop</Link></div>;
+
+  const imageUrl = product.image ? (product.image.startsWith('/') && !product.image.startsWith('http') ? `http://localhost:5001${product.image}` : product.image) : "";
 
   return (
     <SectionWrapper>
@@ -21,18 +55,30 @@ const ProductDetail = () => {
         <div className="grid md:grid-cols-2 gap-8 md:gap-12">
           {/* Image */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="relative gradient-pink rounded-3xl aspect-square flex items-center justify-center overflow-hidden shadow-warm">
-            <div className="absolute inset-0 animate-shimmer" />
-            <span className="text-[8rem] relative z-10 drop-shadow-lg">🕯️</span>
-            <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-primary/5 to-transparent" />
+            {imageUrl ? (
+              <img src={imageUrl} alt={product.title || product.name} className="w-full h-full object-cover" />
+            ) : (
+              <>
+                <div className="absolute inset-0 animate-shimmer" />
+                <span className="text-[8rem] relative z-10 drop-shadow-lg">🕯️</span>
+                <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-primary/5 to-transparent" />
+              </>
+            )}
+            <button
+              onClick={toggleWishlist}
+              className={`absolute top-4 right-4 p-3 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-110 ${isWishlisted ? 'bg-primary/20 text-primary' : 'bg-white/50 text-foreground/80 hover:bg-white/80'}`}
+            >
+              <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-primary text-primary' : ''}`} />
+            </button>
           </motion.div>
 
           {/* Details */}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col justify-center">
             <p className="text-sm text-gold font-semibold mb-2 tracking-wide uppercase">{product.category}</p>
-            <h1 className="text-3xl md:text-4xl font-heading font-bold mb-2">{product.name}</h1>
+            <h1 className="text-3xl md:text-4xl font-heading font-bold mb-2">{product.title || product.name}</h1>
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? "fill-gold text-gold" : "text-border"}`} />)}</div>
-              <span className="text-sm text-muted-foreground">({product.reviews} reviews)</span>
+              <div className="flex">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`w-4 h-4 ${i < Math.floor(product.rating || 5) ? "fill-gold text-gold" : "text-border"}`} />)}</div>
+              <span className="text-sm text-muted-foreground">({product.reviews || 0} reviews)</span>
             </div>
             <p className="text-muted-foreground mb-6 leading-relaxed">{product.description}. Made from premium soy wax with pure essential oils, this candle burns for 40+ hours filling your space with a luxurious aroma.</p>
             <p className="text-3xl font-heading font-bold mb-6 text-foreground">₹{product.price}</p>

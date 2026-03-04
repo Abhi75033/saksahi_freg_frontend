@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ShoppingBag, Heart, Menu, X, User } from "lucide-react";
+import { ShoppingBag, Heart, Menu, X, User, LogOut, Settings } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "@/assets/logo.jpeg";
 
@@ -15,6 +16,7 @@ const navLinks = [
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { totalItems } = useCart();
+  const { user, logout } = useAuth();
   const location = useLocation();
 
   return (
@@ -30,9 +32,8 @@ const Navbar = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={`text-sm font-medium tracking-wide transition-colors duration-300 hover:text-primary relative ${
-                location.pathname === link.to ? "text-primary" : "text-foreground/60"
-              }`}
+              className={`text-sm font-medium tracking-wide transition-colors duration-300 hover:text-primary relative ${location.pathname === link.to ? "text-primary" : "text-foreground/60"
+                }`}
             >
               {link.label}
               {location.pathname === link.to && (
@@ -43,12 +44,29 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link to="/login" className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200">
-            <User className="w-5 h-5 text-foreground/60" />
-          </Link>
-          <button className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200 relative">
+          {user ? (
+            <div className="flex items-center gap-2">
+              {user.role === 'admin' && (
+                <Link to="/admin" title="Admin Dashboard" className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200">
+                  <Settings className="w-5 h-5 text-foreground/60" />
+                </Link>
+              )}
+              <button
+                onClick={logout}
+                title="Logout"
+                className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200"
+              >
+                <LogOut className="w-5 h-5 text-foreground/60" />
+              </button>
+            </div>
+          ) : (
+            <Link to="/login" title="Login" className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200">
+              <User className="w-5 h-5 text-foreground/60" />
+            </Link>
+          )}
+          <Link to="/wishlist" className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200 relative">
             <Heart className="w-5 h-5 text-foreground/60" />
-          </button>
+          </Link>
           <Link to="/cart" className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200 relative">
             <ShoppingBag className="w-5 h-5 text-foreground/60" />
             {totalItems > 0 && (
@@ -101,9 +119,21 @@ const Navbar = () => {
                 </motion.div>
               ))}
               <div className="border-t border-border/50 pt-6 flex flex-col gap-4">
-                <Link to="/login" onClick={() => setMobileOpen(false)} className="text-lg text-foreground/60 hover:text-primary transition-colors">Login</Link>
-                <Link to="/register" onClick={() => setMobileOpen(false)} className="text-lg text-foreground/60 hover:text-primary transition-colors">Register</Link>
-                <Link to="/orders" onClick={() => setMobileOpen(false)} className="text-lg text-foreground/60 hover:text-primary transition-colors">My Orders</Link>
+                {user ? (
+                  <>
+                    <span className="text-lg text-foreground font-semibold">Hi, {user.name}</span>
+                    {user.role === 'admin' && (
+                      <Link to="/admin" onClick={() => setMobileOpen(false)} className="text-lg text-foreground/60 hover:text-primary transition-colors">Admin Dashboard</Link>
+                    )}
+                    <Link to="/orders" onClick={() => setMobileOpen(false)} className="text-lg text-foreground/60 hover:text-primary transition-colors">My Orders</Link>
+                    <button onClick={() => { logout(); setMobileOpen(false); }} className="text-lg text-left text-foreground/60 hover:text-primary transition-colors">Logout</button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login" onClick={() => setMobileOpen(false)} className="text-lg text-foreground/60 hover:text-primary transition-colors">Login</Link>
+                    <Link to="/register" onClick={() => setMobileOpen(false)} className="text-lg text-foreground/60 hover:text-primary transition-colors">Register</Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
