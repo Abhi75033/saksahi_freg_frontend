@@ -22,7 +22,7 @@ const AdminProducts = () => {
 
     const fetchProducts = async () => {
         try {
-            const res = await fetch("http://localhost:5001/api/products");
+            const res = await fetch("https://sakshi-freg-backend.onrender.com/api/products");
             const data = await res.json();
             setProducts(data);
         } catch (error) {
@@ -49,7 +49,7 @@ const AdminProducts = () => {
         setUploading(true);
 
         try {
-            const res = await fetch("http://localhost:5001/api/upload", {
+            const res = await fetch("https://sakshi-freg-backend.onrender.com/api/upload", {
                 method: "POST",
                 body: bodyFormData,
             });
@@ -72,7 +72,7 @@ const AdminProducts = () => {
 
         try {
             if (editingId) {
-                await fetch(`http://localhost:5001/api/products/${editingId}`, {
+                await fetch(`https://sakshi-freg-backend.onrender.com/api/products/${editingId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -82,7 +82,7 @@ const AdminProducts = () => {
         });
         toast.success("Product updated");
       } else {
-        await fetch("http://localhost:5001/api/products", {
+        await fetch("https://sakshi-freg-backend.onrender.com/api/products", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -102,7 +102,7 @@ const AdminProducts = () => {
   const deleteHandler = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        await fetch(`http://localhost:5001/api/products/${id}`, {
+        await fetch(`https://sakshi-freg-backend.onrender.com/api/products/${id}`, {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${user?.token}`,
@@ -154,7 +154,7 @@ const AdminProducts = () => {
             {products.map((p: any) => (
               <tr key={p._id || p.id} className="border-b border-border/50">
                 <td className="p-3">
-                  <img src={p.image.startsWith('/') && !p.image.startsWith('http') ? `http://localhost:5001${p.image}` : p.image} alt={p.title || p.name} className="w-12 h-12 object-cover rounded" />
+                  <img src={p.image.startsWith('/') && !p.image.startsWith('http') ? `https://sakshi-freg-backend.onrender.com${p.image}` : p.image} alt={p.title || p.name} className="w-12 h-12 object-cover rounded" />
                 </td>
                 <td className="p-3 text-sm font-medium">{p.title || p.name}</td>
                 <td className="p-3 text-sm">₹{p.price}</td>

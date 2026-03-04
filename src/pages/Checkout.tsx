@@ -62,7 +62,7 @@ const Checkout = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:5001/api/orders", {
+      const res = await fetch("https://sakshi-freg-backend.onrender.com/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

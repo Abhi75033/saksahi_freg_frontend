@@ -26,7 +26,7 @@ const ProductCard = ({ product, index = 0 }: { product: Product | any; index?: n
     }
 
     try {
-      const res = await fetch("http://localhost:5001/api/users/wishlist", {
+      const res = await fetch("https://sakshi-freg-backend.onrender.com/api/users/wishlist", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -44,7 +44,7 @@ const ProductCard = ({ product, index = 0 }: { product: Product | any; index?: n
     }
   };
 
-  const imageUrl = product.image ? (product.image.startsWith('/') && !product.image.startsWith('http') ? `http://localhost:5001${product.image}` : product.image) : "";
+  const imageUrl = product.image ? (product.image.startsWith('/') && !product.image.startsWith('http') ? `https://sakshi-freg-backend.onrender.com${product.image}` : product.image) : "";
 
   return (
     <motion.div

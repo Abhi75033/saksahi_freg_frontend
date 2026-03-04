@@ -29,7 +29,7 @@ const Register = () => {
     }
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:5001/api/users", {
+      const res = await fetch("https://sakshi-freg-backend.onrender.com/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

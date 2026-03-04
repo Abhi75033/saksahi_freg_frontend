@@ -34,7 +34,7 @@ const Orders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/orders/myorders", {
+        const res = await fetch("https://sakshi-freg-backend.onrender.com/api/orders/myorders", {
           headers: {
             Authorization: `Bearer ${user?.token}`,
           },
@@ -100,7 +100,7 @@ const Orders = () => {
                     <div className="space-y-3 mb-4">
                       {order.orderItems.map((item) => (
                         <div key={item._id} className="flex items-center gap-4">
-                          <img src={item.image.startsWith('/') && !item.image.startsWith('http') ? `http://localhost:5001${item.image}` : item.image} alt={item.title} className="w-16 h-16 object-cover rounded-xl shadow-sm border border-border/30" />
+                          <img src={item.image.startsWith('/') && !item.image.startsWith('http') ? `https://sakshi-freg-backend.onrender.com${item.image}` : item.image} alt={item.title} className="w-16 h-16 object-cover rounded-xl shadow-sm border border-border/30" />
                           <div className="flex-1">
                             <p className="font-medium text-sm">{item.title}</p>
                             <p className="text-sm text-muted-foreground">Qty: {item.qty} × ₹{item.price}</p>

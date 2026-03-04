@@ -18,7 +18,7 @@ const AdminOrders = () => {
 
     const fetchOrders = async () => {
         try {
-            const res = await fetch("http://localhost:5001/api/orders", {
+            const res = await fetch("https://sakshi-freg-backend.onrender.com/api/orders", {
                 headers: { Authorization: `Bearer ${user?.token}` },
       });
       const data = await res.json();
@@ -36,7 +36,7 @@ const AdminOrders = () => {
 
   const updateStatus = async (id: string, status: string) => {
     try {
-      await fetch(`http://localhost:5001/api/orders/${id}/status`, {
+      await fetch(`https://sakshi-freg-backend.onrender.com/api/orders/${id}/status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

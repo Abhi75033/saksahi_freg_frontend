@@ -29,7 +29,7 @@ const ProductDetail = () => {
       return;
     }
     try {
-      const res = await fetch("http://localhost:5001/api/users/wishlist", {
+      const res = await fetch("https://sakshi-freg-backend.onrender.com/api/users/wishlist", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -47,7 +47,7 @@ const ProductDetail = () => {
 
   if (!product) return <div className="container mx-auto px-4 py-20 text-center"><p>Product not found</p><Link to="/shop" className="text-primary">Back to Shop</Link></div>;
 
-  const imageUrl = product.image ? (product.image.startsWith('/') && !product.image.startsWith('http') ? `http://localhost:5001${product.image}` : product.image) : "";
+  const imageUrl = product.image ? (product.image.startsWith('/') && !product.image.startsWith('http') ? `https://sakshi-freg-backend.onrender.com${product.image}` : product.image) : "";
 
   return (
     <SectionWrapper>

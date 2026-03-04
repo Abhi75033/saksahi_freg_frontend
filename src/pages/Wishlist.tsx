@@ -13,7 +13,7 @@ const Wishlist = () => {
     useEffect(() => {
         const fetchWishlist = async () => {
             try {
-                const res = await fetch("http://localhost:5001/api/users/wishlist", {
+                const res = await fetch("https://sakshi-freg-backend.onrender.com/api/users/wishlist", {
                     headers: {
                         Authorization: `Bearer ${user?.token}`,
           },
