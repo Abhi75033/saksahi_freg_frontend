@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import SectionWrapper from "@/components/SectionWrapper";
 import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
@@ -11,7 +11,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
+  const redirectTo = searchParams.get("redirect") || "/";
 
   const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +27,7 @@ const Login = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to login");
       login(data);
-      navigate("/");
+      navigate(redirectTo);
     } catch (error: any) {
       toast.error(error.message);
     } finally {

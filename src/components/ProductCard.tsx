@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ShoppingBag, Star, Heart } from "lucide-react";
+import { ShoppingBag, Star, Heart, AlertTriangle } from "lucide-react";
 import { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -36,7 +36,7 @@ const ProductCard = ({ product, index = 0 }: { product: Product | any; index?: n
       });
       const data = await res.json();
       if (!res.ok) throw new Error("Failed to update wishlist");
-      
+
       setIsWishlisted(!isWishlisted);
       toast.success(isWishlisted ? "Removed from wishlist" : "Added to wishlist");
     } catch (error) {
@@ -63,13 +63,17 @@ const ProductCard = ({ product, index = 0 }: { product: Product | any; index?: n
               <span className="text-6xl drop-shadow-md">🕯️</span>
             </div>
           )}
-          <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500" />
-          <button
-            onClick={toggleWishlist}
-            className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-110 ${isWishlisted ? 'bg-primary/20 text-primary' : 'bg-white/50 text-foreground/80 hover:bg-white/80'}`}
-          >
-            <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-primary text-primary' : ''}`} />
-          </button>
+          {/* Low-stock / out-of-stock badge */}
+          {typeof product.quantity === 'number' && product.quantity === 0 && (
+            <div className="absolute top-3 left-3 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-500/90 text-white">
+              Out of Stock
+            </div>
+          )}
+          {typeof product.quantity === 'number' && product.quantity > 0 && product.quantity < 10 && (
+            <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/90 text-white">
+              <AlertTriangle className="w-3 h-3" /> Only {product.quantity} left
+            </div>
+          )}
         </div>
       </Link>
       <div className="p-4">
@@ -88,9 +92,11 @@ const ProductCard = ({ product, index = 0 }: { product: Product | any; index?: n
           <button
             onClick={(e) => {
               e.preventDefault();
+              if (product.quantity === 0) return;
               addToCart(product);
             }}
-            className="p-2.5 rounded-full bg-primary text-primary-foreground hover:shadow-warm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+            disabled={product.quantity === 0}
+            className="p-2.5 rounded-full bg-primary text-primary-foreground hover:shadow-warm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ShoppingBag className="w-4 h-4" />
           </button>

@@ -93,7 +93,8 @@ const Navbar = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
             transition={{ type: "spring", damping: 25 }}
-            className="fixed inset-0 z-50 bg-background"
+            className="fixed inset-0 z-50"
+            style={{ backgroundColor: 'hsl(37, 60%, 97%)' }}
           >
             <div className="flex justify-between items-center p-4 border-b border-border/50">
               <img src={logo} alt="Sakhi" className="h-10 rounded-xl" />

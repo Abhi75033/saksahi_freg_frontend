@@ -3,7 +3,7 @@ import { products, dummyReviews } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Star, Minus, Plus, ShoppingBag, Zap, MapPin, Heart } from "lucide-react";
+import { Star, Minus, Plus, ShoppingBag, Zap, MapPin, Heart, AlertTriangle } from "lucide-react";
 import SectionWrapper from "@/components/SectionWrapper";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -81,7 +81,19 @@ const ProductDetail = () => {
               <span className="text-sm text-muted-foreground">({product.reviews || 0} reviews)</span>
             </div>
             <p className="text-muted-foreground mb-6 leading-relaxed">{product.description}. Made from premium soy wax with pure essential oils, this candle burns for 40+ hours filling your space with a luxurious aroma.</p>
-            <p className="text-3xl font-heading font-bold mb-6 text-foreground">₹{product.price}</p>
+            <p className="text-3xl font-heading font-bold mb-4 text-foreground">₹{product.price}</p>
+
+            {/* Stock warning */}
+            {typeof product.quantity === 'number' && product.quantity === 0 && (
+              <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5">
+                <AlertTriangle className="w-4 h-4" /> This product is currently out of stock
+              </div>
+            )}
+            {typeof product.quantity === 'number' && product.quantity > 0 && product.quantity < 10 && (
+              <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-2.5">
+                <AlertTriangle className="w-4 h-4" /> Hurry! Only {product.quantity} left in stock
+              </div>
+            )}
 
             {/* Quantity */}
             <div className="flex items-center gap-4 mb-6">
@@ -96,15 +108,16 @@ const ProductDetail = () => {
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 mb-8">
               <button
-                onClick={() => { for (let i = 0; i < qty; i++) addToCart(product); }}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:shadow-warm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                onClick={() => { if (product.quantity !== 0) { for (let i = 0; i < qty; i++) addToCart(product); } }}
+                disabled={product.quantity === 0}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:shadow-warm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <ShoppingBag className="w-4 h-4" /> Add to Cart
+                <ShoppingBag className="w-4 h-4" /> {product.quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
               </button>
               <Link
                 to="/checkout"
-                onClick={() => { for (let i = 0; i < qty; i++) addToCart(product); }}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-full gradient-gold text-primary-foreground font-medium hover:shadow-warm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                onClick={(e) => { if (product.quantity === 0) { e.preventDefault(); return; } for (let i = 0; i < qty; i++) addToCart(product); }}
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-full gradient-gold text-primary-foreground font-medium hover:shadow-warm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${product.quantity === 0 ? 'opacity-40 pointer-events-none' : ''}`}
               >
                 <Zap className="w-4 h-4" /> Buy Now
               </Link>

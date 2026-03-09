@@ -1,20 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
-import { CheckCircle, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { CheckCircle, Sparkles, AlertCircle } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import SectionWrapper from "@/components/SectionWrapper";
 import { toast } from "sonner";
+
+const COD_LIMIT = 600;
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
   const [loading, setLoading] = useState(false);
   const delivery = 49;
+  const grandTotal = totalPrice + delivery;
+
+  // If COD was selected but total is now >= limit, switch to UPI
+  useEffect(() => {
+    if (paymentMethod === "Cash on Delivery" && grandTotal >= COD_LIMIT) {
+      setPaymentMethod("UPI");
+    }
+  }, [grandTotal, paymentMethod]);
 
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -33,8 +44,9 @@ const Checkout = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (items.length === 0) {
-      toast.error("Your cart is empty");
+    if (items.length === 0) { toast.error("Your cart is empty"); return; }
+    if (paymentMethod === "Cash on Delivery" && grandTotal >= COD_LIMIT) {
+      toast.error("COD is not available for orders ₹600 or above");
       return;
     }
 
@@ -58,7 +70,7 @@ const Checkout = () => {
         phone: formData.phone,
       },
       paymentMethod,
-      totalPrice: totalPrice + delivery,
+      totalPrice: grandTotal,
     };
 
     try {
@@ -101,6 +113,12 @@ const Checkout = () => {
         </div>
       </SectionWrapper>
     );
+
+  const paymentOptions = [
+    { id: "UPI", label: "UPI" },
+    { id: "Credit Card", label: "Credit Card" },
+    { id: "Cash on Delivery", label: "Cash on Delivery" },
+  ];
 
   return (
     <>
@@ -152,28 +170,46 @@ const Checkout = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Payment */}
               <div className="glass-card p-6 hover:shadow-elevated transition-shadow duration-500">
                 <h2 className="font-heading font-semibold text-lg mb-4">Payment Method</h2>
+                {grandTotal >= COD_LIMIT && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-4 flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3"
+                  >
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    COD not available for orders above ₹{COD_LIMIT - 1}. Please choose UPI or Credit Card.
+                  </motion.div>
+                )}
                 <div className="grid sm:grid-cols-3 gap-3">
-                  {[
-                    { id: "UPI", label: "UPI" },
-                    { id: "Credit Card", label: "Credit Card" },
-                    { id: "Cash on Delivery", label: "Cash on Delivery" },
-                  ].map(m => (
-                    <button
-                      key={m.id}
-                      type="button"
-                      onClick={() => setPaymentMethod(m.id)}
-                      className={`p-4 rounded-xl border-2 text-sm font-medium transition-all duration-300 ${
-                        paymentMethod === m.id ? "border-primary bg-primary/8 shadow-warm" : "border-border/60 hover:border-primary/30"
-                      }`}
-                    >
-                      {m.label}
-                    </button>
-                  ))}
+                  {paymentOptions.map(m => {
+                    const isCodDisabled = m.id === "Cash on Delivery" && grandTotal >= COD_LIMIT;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        disabled={isCodDisabled}
+                        onClick={() => !isCodDisabled && setPaymentMethod(m.id)}
+                        className={`p-4 rounded-xl border-2 text-sm font-medium transition-all duration-300 relative ${paymentMethod === m.id
+                            ? "border-primary bg-primary/8 shadow-warm"
+                            : isCodDisabled
+                              ? "border-border/30 opacity-40 cursor-not-allowed bg-secondary/40"
+                              : "border-border/60 hover:border-primary/30"
+                          }`}
+                      >
+                        {m.label}
+                        {isCodDisabled && <span className="block text-[10px] mt-0.5 text-muted-foreground">Above ₹{COD_LIMIT - 1}</span>}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
+
+            {/* Order Summary */}
             <div className="glass-card p-6 h-fit shadow-elevated">
               <h3 className="font-heading font-semibold text-lg mb-4">Order Summary</h3>
               <div className="space-y-2 text-sm mb-4 max-h-60 overflow-y-auto pr-2">
@@ -188,13 +224,14 @@ const Checkout = () => {
                 <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>₹{totalPrice}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span>₹{delivery}</span></div>
                 <div className="border-t border-border/50 pt-3 flex justify-between font-heading font-bold text-lg">
-                  <span>Total</span><span className="text-primary">₹{totalPrice + delivery}</span>
+                  <span>Total</span><span className="text-primary">₹{grandTotal}</span>
                 </div>
               </div>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={loading}
-                className="mt-6 w-full px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:shadow-warm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed">
+                className="mt-6 w-full px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:shadow-warm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+              >
                 {loading ? "Processing..." : "Place Order"}
               </button>
             </div>

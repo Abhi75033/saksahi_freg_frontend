@@ -1,12 +1,16 @@
 export interface Product {
   id: string;
+  _id?: string;      // MongoDB ObjectId (from API)
   name: string;
+  title?: string;    // Some API products use title instead of name
   description: string;
   price: number;
   image: string;
+  images?: string[]; // Multiple images (Cloudinary)
+  quantity?: number; // Stock quantity
   category: string;
-  rating: number;
-  reviews: number;
+  rating?: number;
+  reviews?: number;
 }
 
 export const products: Product[] = [
