@@ -20,70 +20,67 @@ const Navbar = () => {
   const location = useLocation();
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border/30 shadow-soft">
-      <div className="container mx-auto px-4 flex items-center justify-between h-16 md:h-20">
-        <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Sakhi Fragrance House" className="h-10 md:h-14 rounded-xl shadow-soft" />
-        </Link>
-
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.map(link => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`text-sm font-medium tracking-wide transition-colors duration-300 hover:text-primary relative ${location.pathname === link.to ? "text-primary" : "text-foreground/60"
-                }`}
-            >
-              {link.label}
-              {location.pathname === link.to && (
-                <motion.div layoutId="nav-indicator" className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full" />
-              )}
-            </Link>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {user ? (
-            <div className="flex items-center gap-2">
-              {user.role === 'admin' && (
-                <Link to="/admin" title="Admin Dashboard" className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200">
-                  <Settings className="w-5 h-5 text-foreground/60" />
-                </Link>
-              )}
-              <button
-                onClick={logout}
-                title="Logout"
-                className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200"
-              >
-                <LogOut className="w-5 h-5 text-foreground/60" />
-              </button>
-            </div>
-          ) : (
-            <Link to="/login" title="Login" className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200">
-              <User className="w-5 h-5 text-foreground/60" />
-            </Link>
-          )}
-          <Link to="/wishlist" className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200 relative">
-            <Heart className="w-5 h-5 text-foreground/60" />
+    <>
+      <nav className="sticky top-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border/30 shadow-soft">
+        <div className="container mx-auto px-4 flex items-center justify-between h-16 md:h-20">
+          <Link to="/" className="flex items-center gap-2">
+            <img src={logo} alt="Sakhi Fragrance House" className="h-10 md:h-14 rounded-xl shadow-soft" />
           </Link>
-          <Link to="/cart" className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200 relative">
-            <ShoppingBag className="w-5 h-5 text-foreground/60" />
-            {totalItems > 0 && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-semibold shadow-warm"
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-8">
+            {navLinks.map(link => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`text-sm font-medium tracking-wide transition-colors duration-300 hover:text-primary relative ${location.pathname === link.to ? "text-primary" : "text-foreground/60"
+                  }`}
               >
-                {totalItems}
-              </motion.span>
+                {link.label}
+                {location.pathname === link.to && (
+                  <motion.div layoutId="nav-indicator" className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full" />
+                )}
+              </Link>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {user ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={logout}
+                  title="Logout"
+                  className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200"
+                >
+                  <LogOut className="w-5 h-5 text-foreground/60" />
+                </button>
+              </div>
+            ) : (
+              <Link to="/login" title="Login" className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200">
+                <User className="w-5 h-5 text-foreground/60" />
+              </Link>
             )}
-          </Link>
-          <button className="md:hidden p-2" onClick={() => setMobileOpen(true)}>
-            <Menu className="w-6 h-6" />
-          </button>
+            <Link to="/wishlist" className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200 relative">
+              <Heart className="w-5 h-5 text-foreground/60" />
+            </Link>
+            <Link to="/cart" className="p-2.5 rounded-full hover:bg-secondary transition-colors duration-200 relative">
+              <ShoppingBag className="w-5 h-5 text-foreground/60" />
+              {totalItems > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-semibold shadow-warm"
+                >
+                  {totalItems}
+                </motion.span>
+              )}
+            </Link>
+            <button className="md:hidden p-2" onClick={() => setMobileOpen(true)}>
+              <Menu className="w-6 h-6" />
+            </button>
+          </div>
         </div>
-      </div>
+      </nav>
 
       {/* Mobile menu */}
       <AnimatePresence>
@@ -93,8 +90,7 @@ const Navbar = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
             transition={{ type: "spring", damping: 25 }}
-            className="fixed inset-0 z-50"
-            style={{ backgroundColor: 'hsl(37, 60%, 97%)' }}
+            className="fixed inset-0 z-[100] bg-background"
           >
             <div className="flex justify-between items-center p-4 border-b border-border/50">
               <img src={logo} alt="Sakhi" className="h-10 rounded-xl" />
@@ -123,9 +119,6 @@ const Navbar = () => {
                 {user ? (
                   <>
                     <span className="text-lg text-foreground font-semibold">Hi, {user.name}</span>
-                    {user.role === 'admin' && (
-                      <Link to="/admin" onClick={() => setMobileOpen(false)} className="text-lg text-foreground/60 hover:text-primary transition-colors">Admin Dashboard</Link>
-                    )}
                     <Link to="/orders" onClick={() => setMobileOpen(false)} className="text-lg text-foreground/60 hover:text-primary transition-colors">My Orders</Link>
                     <button onClick={() => { logout(); setMobileOpen(false); }} className="text-lg text-left text-foreground/60 hover:text-primary transition-colors">Logout</button>
                   </>
@@ -140,7 +133,7 @@ const Navbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </>
   );
 };
 
