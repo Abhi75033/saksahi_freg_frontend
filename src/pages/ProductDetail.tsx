@@ -1,16 +1,17 @@
 import { useParams, Link } from "react-router-dom";
-import { products, dummyReviews } from "@/data/products";
+import { dummyReviews } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Star, Minus, Plus, ShoppingBag, Zap, MapPin, Heart, AlertTriangle } from "lucide-react";
+import { Star, Minus, Plus, ShoppingBag, Zap, MapPin, Heart, AlertTriangle, Loader2 } from "lucide-react";
 import SectionWrapper from "@/components/SectionWrapper";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { useProduct } from "@/hooks/useProducts";
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const product: any = products.find(p => p.id === id);
+  const { product, loading, error } = useProduct(id);
   const { addToCart } = useCart();
   const [qty, setQty] = useState(1);
   const [pincode, setPincode] = useState("");
@@ -45,9 +46,21 @@ const ProductDetail = () => {
     }
   };
 
-  if (!product) return <div className="container mx-auto px-4 py-20 text-center"><p>Product not found</p><Link to="/shop" className="text-primary">Back to Shop</Link></div>;
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+    </div>
+  );
+
+  if (error || !product) return (
+    <div className="container mx-auto px-4 py-20 text-center">
+      <p className="mb-4 text-muted-foreground">{error || "Product not found"}</p>
+      <Link to="/shop" className="text-primary hover:underline">← Back to Shop</Link>
+    </div>
+  );
 
   const imageUrl = product.image ? (product.image.startsWith('/') && !product.image.startsWith('http') ? `https://sakshi-freg-backend.onrender.com${product.image}` : product.image) : "";
+
 
   return (
     <SectionWrapper>

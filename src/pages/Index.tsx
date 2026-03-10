@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Star, Sparkles, Send, Flame } from "lucide-react";
-import { products, testimonials } from "@/data/products";
+import { ArrowRight, Star, Sparkles, Send, Flame, Loader2 } from "lucide-react";
+import { testimonials } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import SectionWrapper from "@/components/SectionWrapper";
 import { useState } from "react";
+import { useProducts } from "@/hooks/useProducts";
 
 const CandleFlame = () => (
   <div className="relative animate-float">
@@ -20,7 +21,7 @@ const HeroSection = () => (
     {/* Decorative circles */}
     <div className="absolute top-20 left-10 w-64 h-64 rounded-full bg-gold/5 blur-3xl" />
     <div className="absolute bottom-20 right-10 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
-    
+
     {/* Particles */}
     {Array.from({ length: 8 }).map((_, i) => (
       <div
@@ -34,7 +35,7 @@ const HeroSection = () => (
         }}
       />
     ))}
-    
+
     <div className="container mx-auto px-4 text-center relative z-10">
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
@@ -44,7 +45,7 @@ const HeroSection = () => (
       >
         <CandleFlame />
       </motion.div>
-      
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -55,7 +56,7 @@ const HeroSection = () => (
         <Flame className="w-4 h-4 text-gold" />
         <div className="h-px w-12 bg-gold/50" />
       </motion.div>
-      
+
       <motion.h1
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -95,36 +96,48 @@ const HeroSection = () => (
   </section>
 );
 
-const FeaturedProducts = () => (
-  <SectionWrapper>
-    <div className="container mx-auto px-4">
-      <div className="text-center mb-12">
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="flex items-center justify-center gap-3 mb-4"
-        >
-          <div className="h-px w-16 bg-border" />
-          <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">Curated for you</span>
-          <div className="h-px w-16 bg-border" />
-        </motion.div>
-        <h2 className="text-3xl md:text-4xl font-heading font-bold mb-3">Our Bestsellers</h2>
-        <p className="text-muted-foreground max-w-md mx-auto">Handcrafted with love, each candle tells a story through its fragrance</p>
+const FeaturedProducts = () => {
+  const { products, loading } = useProducts();
+  const featured = products.filter((p: any) => p.isBestseller).slice(0, 4);
+  const display = featured.length > 0 ? featured : products.slice(0, 4);
+
+  return (
+    <SectionWrapper>
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="flex items-center justify-center gap-3 mb-4"
+          >
+            <div className="h-px w-16 bg-border" />
+            <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">Curated for you</span>
+            <div className="h-px w-16 bg-border" />
+          </motion.div>
+          <h2 className="text-3xl md:text-4xl font-heading font-bold mb-3">Our Bestsellers</h2>
+          <p className="text-muted-foreground max-w-md mx-auto">Handcrafted with love, each candle tells a story through its fragrance</p>
+        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-7 h-7 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {display.map((p: any, i: number) => (
+              <ProductCard key={p._id || p.id} product={p} index={i} />
+            ))}
+          </div>
+        )}
+        <div className="text-center mt-10">
+          <Link to="/shop" className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-primary/40 text-primary font-medium hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+            View All Products <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        {products.slice(0, 4).map((p, i) => (
-          <ProductCard key={p.id} product={p} index={i} />
-        ))}
-      </div>
-      <div className="text-center mt-10">
-        <Link to="/shop" className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-primary/40 text-primary font-medium hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-          View All Products <ArrowRight className="w-4 h-4" />
-        </Link>
-      </div>
-    </div>
-  </SectionWrapper>
-);
+    </SectionWrapper>
+  );
+};
 
 const AboutSection = () => (
   <SectionWrapper className="bg-card/50">
