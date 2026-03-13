@@ -17,6 +17,7 @@ const ProductDetail = () => {
   const [pincode, setPincode] = useState("");
   const { user } = useAuth();
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string>("");
 
   useEffect(() => {
     if (product && user?.wishlist?.some((wid: any) => wid === product._id || wid === product.id)) {
@@ -59,31 +60,57 @@ const ProductDetail = () => {
     </div>
   );
 
-  const imageUrl = product.image ? (product.image.startsWith('/') && !product.image.startsWith('http') ? `https://sakshi-freg-backend.onrender.com${product.image}` : product.image) : "";
+  const resolveImageUrl = (url: string) => {
+    if (!url) return "";
+    return url.startsWith('/') && !url.startsWith('http') ? `https://sakshi-freg-backend.onrender.com${url}` : url;
+  };
 
+  const allImages = Array.from(new Set([
+    product.image ? resolveImageUrl(product.image) : "",
+    ...(product.images || []).map(resolveImageUrl)
+  ])).filter(Boolean);
+
+  const currentDisplayImage = selectedImage || allImages[0] || "";
 
   return (
     <SectionWrapper>
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-          {/* Image */}
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="relative gradient-pink rounded-3xl aspect-square flex items-center justify-center overflow-hidden shadow-warm">
-            {imageUrl ? (
-              <img src={imageUrl} alt={product.title || product.name} className="w-full h-full object-cover" />
-            ) : (
-              <>
-                <div className="absolute inset-0 animate-shimmer" />
-                <span className="text-[8rem] relative z-10 drop-shadow-lg">🕯️</span>
-                <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-primary/5 to-transparent" />
-              </>
+          {/* Image Gallery */}
+          <div className="flex flex-col gap-4">
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="relative gradient-pink rounded-3xl aspect-square flex items-center justify-center overflow-hidden shadow-warm">
+              {currentDisplayImage ? (
+                <img src={currentDisplayImage} alt={product.title || product.name} className="w-full h-full object-cover transition-opacity duration-300" />
+              ) : (
+                <>
+                  <div className="absolute inset-0 animate-shimmer" />
+                  <span className="text-[8rem] relative z-10 drop-shadow-lg">🕯️</span>
+                  <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-primary/5 to-transparent" />
+                </>
+              )}
+              <button
+                onClick={toggleWishlist}
+                className={`absolute top-4 right-4 p-3 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-110 ${isWishlisted ? 'bg-primary/20 text-primary' : 'bg-white/50 text-foreground/80 hover:bg-white/80'}`}
+              >
+                <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-primary text-primary' : ''}`} />
+              </button>
+            </motion.div>
+
+            {/* Thumbnails */}
+            {allImages.length > 1 && (
+              <div className="flex gap-4 overflow-x-auto pb-2 snap-x hide-scrollbar">
+                {allImages.map((imgUrl, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedImage(imgUrl)}
+                    className={`relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 snap-start transition-all duration-200 ${currentDisplayImage === imgUrl ? 'ring-2 ring-primary ring-offset-2 scale-95 opacity-100' : 'opacity-70 hover:opacity-100 border border-border'}`}
+                  >
+                    <img src={imgUrl} alt={`${product.title || product.name} view ${idx + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
             )}
-            <button
-              onClick={toggleWishlist}
-              className={`absolute top-4 right-4 p-3 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-110 ${isWishlisted ? 'bg-primary/20 text-primary' : 'bg-white/50 text-foreground/80 hover:bg-white/80'}`}
-            >
-              <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-primary text-primary' : ''}`} />
-            </button>
-          </motion.div>
+          </div>
 
           {/* Details */}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col justify-center">
